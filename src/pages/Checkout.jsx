@@ -8,13 +8,18 @@ import {
   Cart,
 } from '../components';
 import { useSelector, useDispatch } from 'react-redux';
-import { showModal } from '../store/action/checkoutAction';
+import { useNavigate } from 'react-router-dom';
 
 const Checkout = () => {
   const dispatch = useDispatch();
-  const { currentWindow, userInfoModal } = useSelector(
-    (state) => state.checkout
-  );
+  const { currentWindow } = useSelector((state) => state.checkout);
+  const history = useNavigate();
+
+  useEffect(() => {
+    if (currentWindow === '3') {
+      history('/confirm');
+    }
+  }, [currentWindow]);
 
   return (
     <>
@@ -47,7 +52,6 @@ const Checkout = () => {
           <Cart />
         </Col>
       </Row>{' '}
-      <Modal show={userInfoModal} onHide={() => dispatch(showModal(false))} />
     </>
   );
 };

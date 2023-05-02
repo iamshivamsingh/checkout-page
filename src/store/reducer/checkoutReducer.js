@@ -1,16 +1,10 @@
-import {
-  ADD_BILLING,
-  ADD_PAYMENT,
-  ADD_SHIPPING,
-  SHOW_MODAL,
-} from '../types/checkoutTypes';
+import { ADD_BILLING, ADD_PAYMENT, ADD_SHIPPING } from '../types/checkoutTypes';
 
 const initialState = {
   billing: [],
   shipping: [],
   payment: [],
   currentWindow: '0',
-  userInfoModal: false,
 };
 
 const checkoutReducer = (state = initialState, action) => {
@@ -31,14 +25,8 @@ const checkoutReducer = (state = initialState, action) => {
     case ADD_PAYMENT:
       return {
         ...state,
-        currentWindow: '0',
+        currentWindow: '3',
         payment: action.payload,
-        userInfoModal: true,
-      };
-    case SHOW_MODAL:
-      return {
-        ...state,
-        userInfoModal: action.payload,
       };
 
     default:

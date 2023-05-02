@@ -1,49 +1,81 @@
+import { useState } from 'react';
 import { Button, Col, Form, Row } from 'react-bootstrap';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as Yup from 'yup';
 import { addBilling } from '../../store/action/checkoutAction';
 import { useDispatch } from 'react-redux';
 
 const phoneRegExp =
   /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
 
-const validationSchema = Yup.object().shape({
-  firstName: Yup.string().required('First Name required'),
-  lastName: Yup.string().required('Last Name required'),
-  phone: Yup.string().matches(phoneRegExp, 'Phone number is not valid'),
-  email: Yup.string()
-    .email('Email format is invalids')
-    .required('Email Required'),
-});
-
 const BillingInfo = () => {
-  const dispatch = useDispatch();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(validationSchema),
+  const [errors, setErrors] = useState({});
+
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
   });
 
-  const onSubmit = (data) => {
-    dispatch(addBilling(data));
+  const dispatch = useDispatch();
+
+  const validateEmail = (email) => {
+    return String(email)
+      .toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
+  };
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+
+    let errors = {};
+    if (firstName === '') {
+      errors['firstName'] = 'First Name Required';
+    }
+    if (lastName === '') {
+      errors['lastName'] = 'Last Name Required';
+    }
+    if (email === '') {
+      errors['email'] = 'Email Required';
+    }
+    if (phone === '') {
+      errors['phone'] = 'Phone No Required';
+    }
+    if (!phone.match(phoneRegExp)) {
+      errors['phone'] = 'Please provide valid phone number';
+    }
+    if (!validateEmail(email)) {
+      errors['email'] = 'Please provide valid email address';
+    }
+    setErrors(errors);
+
+    if (Object.keys(errors).length === 0) {
+      dispatch(addBilling(formData));
+    }
+  };
+
+  const { firstName, lastName, email, phone } = formData;
+
+  const onChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
-    <Form className='mt-4' noValidate onSubmit={handleSubmit(onSubmit)}>
+    <Form className='mt-4' noValidate onSubmit={(e) => onSubmit(e)}>
       <Row className='mb-3'>
         <Form.Group as={Col} controlId='formGridEmail'>
           <Form.Label>First Name</Form.Label>
           <Form.Control
             type='text'
             placeholder='First Name'
-            {...register('firstName')}
+            onChange={onChange}
+            value={firstName}
+            name='firstName'
             isInvalid={!!errors.firstName}
           />
           <Form.Control.Feedback type='invalid'>
-            {errors.firstName?.message}
+            {errors.firstName}
           </Form.Control.Feedback>
         </Form.Group>
 
@@ -52,11 +84,13 @@ const BillingInfo = () => {
           <Form.Control
             type='text'
             placeholder='Last Name'
-            {...register('lastName')}
+            onChange={onChange}
+            value={lastName}
+            name='lastName'
             isInvalid={!!errors.lastName}
           />
           <Form.Control.Feedback type='invalid'>
-            {errors.lastName?.message}
+            {errors.lastName}
           </Form.Control.Feedback>
         </Form.Group>
       </Row>
@@ -65,11 +99,13 @@ const BillingInfo = () => {
         <Form.Control
           type='email'
           placeholder='Email'
-          {...register('email')}
+          onChange={onChange}
+          value={email}
+          name='email'
           isInvalid={!!errors.email}
         />
         <Form.Control.Feedback type='invalid'>
-          {errors.email?.message}
+          {errors.email}
         </Form.Control.Feedback>
       </Form.Group>
       <Form.Group className='mb-3' controlId='formGridAddress2'>
@@ -77,11 +113,13 @@ const BillingInfo = () => {
         <Form.Control
           type='number'
           placeholder='Phone No'
-          {...register('phone')}
+          onChange={onChange}
+          value={phone}
+          name='phone'
           isInvalid={!!errors.phone}
         />
         <Form.Control.Feedback type='invalid'>
-          {errors.phone?.message}
+          {errors.phone}
         </Form.Control.Feedback>
       </Form.Group>
       <div className='d-grid my-4'>

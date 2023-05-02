@@ -1,15 +1,15 @@
+import { Badge, Button } from 'react-bootstrap';
 import Table from 'react-bootstrap/Table';
-
-const cartJson = [
-  { id: 1, title: 'Apple Iphone 11', price: 1000.0 },
-  { id: 2, title: 'One Plus Phone', price: 600.0 },
-  { id: 3, title: 'Samsung Phone', price: 800.0 },
-  { id: 4, title: 'Nothing Phone', price: 700.0 },
-  { id: 5, title: 'Apple Ipad', price: 400.0 },
-];
+import { useSelector, useDispatch } from 'react-redux';
+import { removeFromCarts } from '../../store/action/cartAction';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Cart = () => {
-  const price = cartJson.reduce((acc, curr) => {
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const history = useNavigate();
+  const { carts } = useSelector((state) => state.carts);
+  const price = carts.reduce((acc, curr) => {
     return acc + curr.price;
   }, 0);
 
@@ -19,17 +19,39 @@ const Cart = () => {
       <hr />
       <Table hover>
         <thead>
-          {cartJson.map((item) => (
+          {carts.map((item) => (
             <tr key={item.id}>
-              <th>{item.title}</th>
-              <td>${item.price}</td>
+              <th>{item.name}</th>
+              <td>$ {Number(item.price).toFixed(2)}</td>
+              <td>
+                {location.pathname !== '/confirm' && (
+                  <Badge
+                    bg='secondary'
+                    onClick={() => dispatch(removeFromCarts(item))}
+                    className='mouse-pointer'
+                  >
+                    X
+                  </Badge>
+                )}
+              </td>
             </tr>
           ))}
-          <tr>
-            <th>Total Price</th>
-            <td>${price}</td>
-          </tr>
+          {carts.length !== 0 && (
+            <tr>
+              <th>Total Price</th>
+              <td>$ {Number(price).toFixed(2)}</td>
+            </tr>
+          )}
         </thead>
+        {carts.length === 0 && (
+          <Button
+            variant='primary'
+            onClick={() => history('/')}
+            className='col-lg-12 center'
+          >
+            Go To Listing
+          </Button>
+        )}
       </Table>
     </div>
   );
